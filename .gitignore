@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+backend/.venv/
+.venv/
+
+# Secrets
+.env
+backend/.env
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+.next/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
