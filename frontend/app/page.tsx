@@ -1,4 +1,5 @@
 import NovaDespesa from "./NovaDespesa";
+import AcoesDespesa from "./AcoesDespesa";
 type Despesa = {
   id: number;
   descricao: string;
@@ -123,6 +124,10 @@ export default async function Home() {
                   <p className="font-semibold text-red-600">
                     - {formatarDinheiro(despesa.valor)}
                   </p>
+                  <p className="text-sm text-gray-500">
+                    {despesa.categoria}
+                </p>
+                <AcoesDespesa despesa={despesa} />
                 </div>
               ))
             )}

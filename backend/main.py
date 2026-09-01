@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
 from models import Base, DespesaDB
-
+from fastapi import HTTPException
 
 Base.metadata.create_all(bind=engine)
 
@@ -87,3 +87,56 @@ def listar_despesas(
 ):
 
     return db.query(DespesaDB).all()
+
+@app.put("/despesas/{despesa_id}")
+def atualizar_despesa(
+    despesa_id: int,
+    despesa: Despesa,
+    db: Session = Depends(get_db)
+):
+    despesa_db = (
+        db.query(DespesaDB)
+        .filter(DespesaDB.id == despesa_id)
+        .first()
+    )
+
+    if not despesa_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Despesa não encontrada"
+        )
+
+    despesa_db.descricao = despesa.descricao
+    despesa_db.valor = despesa.valor
+    despesa_db.categoria = despesa.categoria
+    despesa_db.data = despesa.data
+
+    db.commit()
+    db.refresh(despesa_db)
+
+    return despesa_db
+
+
+@app.delete("/despesas/{despesa_id}")
+def excluir_despesa(
+    despesa_id: int,
+    db: Session = Depends(get_db)
+):
+    despesa_db = (
+        db.query(DespesaDB)
+        .filter(DespesaDB.id == despesa_id)
+        .first()
+    )
+
+    if not despesa_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Despesa não encontrada"
+        )
+
+    db.delete(despesa_db)
+    db.commit()
+
+    return {
+        "message": "Despesa excluída com sucesso"
+    }
