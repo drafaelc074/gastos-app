@@ -13,6 +13,21 @@ jobs:
   test-backend:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gastos
+          POSTGRES_USER: gastos_user
+          POSTGRES_PASSWORD: gastos_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U gastos_user -d gastos"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
@@ -28,9 +43,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Validar imports da aplicação
+      - name: Executar testes
         working-directory: backend
         env:
-          DATABASE_URL: postgresql://usuario:senha@localhost:5432/gastos
+          DATABASE_URL: postgresql://gastos_user:gastos_password@localhost:5432/gastos
         run: |
-          python -m py_compile main.py database.py models.py
+          python -m pytest -v
