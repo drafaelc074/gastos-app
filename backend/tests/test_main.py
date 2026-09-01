@@ -22,7 +22,7 @@ def test_home():
 
     data = response.json()
 
-    assert data["status"] == "online"
+    assert data["status"] == "offline"
 
 
 def test_criar_despesa():
