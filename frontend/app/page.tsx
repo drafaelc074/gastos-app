@@ -1,3 +1,4 @@
+import NovaDespesa from "./NovaDespesa";
 type Despesa = {
   id: number;
   descricao: string;
@@ -48,9 +49,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <button className="rounded-xl bg-black px-5 py-3 text-white">
-            + Nova despesa
-          </button>
+          <NovaDespesa />
         </header>
 
         <section className="grid gap-6 md:grid-cols-3">
