@@ -5,7 +5,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
-from models import Base, DespesaDB
+from models import Base, DespesaDB, ReceitaDB
 from fastapi import HTTPException
 
 Base.metadata.create_all(bind=engine)
@@ -139,4 +139,85 @@ def excluir_despesa(
 
     return {
         "message": "Despesa excluída com sucesso"
+    }
+
+class Receita(BaseModel):
+    descricao: str
+    valor: float
+    categoria: str
+    data: date
+
+
+@app.post("/receitas")
+def criar_receita(
+    receita: Receita,
+    db: Session = Depends(get_db)
+):
+    nova_receita = ReceitaDB(
+        descricao=receita.descricao,
+        valor=receita.valor,
+        categoria=receita.categoria,
+        data=receita.data
+    )
+
+    db.add(nova_receita)
+    db.commit()
+    db.refresh(nova_receita)
+
+    return nova_receita
+
+
+@app.get("/receitas")
+def listar_receitas(
+    db: Session = Depends(get_db)
+):
+    return db.query(ReceitaDB).all()
+
+@app.put("/receitas/{receita_id}")
+def editar_receita(
+    receita_id: int,
+    receita: Receita,
+    db: Session = Depends(get_db)
+):
+    receita_db = db.query(ReceitaDB).filter(
+        ReceitaDB.id == receita_id
+    ).first()
+
+    if not receita_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Receita não encontrada"
+        )
+
+    receita_db.descricao = receita.descricao
+    receita_db.valor = receita.valor
+    receita_db.categoria = receita.categoria
+    receita_db.data = receita.data
+
+    db.commit()
+    db.refresh(receita_db)
+
+    return receita_db
+
+
+@app.delete("/receitas/{receita_id}")
+def excluir_receita(
+    receita_id: int,
+    db: Session = Depends(get_db)
+):
+    receita_db = db.query(ReceitaDB).filter(
+        ReceitaDB.id == receita_id
+    ).first()
+
+    if not receita_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Receita não encontrada"
+        )
+
+    db.delete(receita_db)
+    db.commit()
+
+    return {
+        "message": "Receita excluída com sucesso"
     }

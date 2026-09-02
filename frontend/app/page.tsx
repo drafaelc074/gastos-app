@@ -1,11 +1,31 @@
 import NovaDespesa from "./NovaDespesa";
 import AcoesDespesa from "./AcoesDespesa";
+import NovaReceita from "./NovaReceita";
+import AcoesReceita from "./AcoesReceita";
+
 type Despesa = {
   id: number;
   descricao: string;
   valor: number;
   categoria: string;
   data: string;
+};
+
+type Receita = {
+  id: number;
+  descricao: string;
+  valor: number;
+  categoria: string;
+  data: string;
+};
+
+type Lancamento = {
+  id: number;
+  descricao: string;
+  valor: number;
+  categoria: string;
+  data: string;
+  tipo: "receita" | "despesa";
 };
 
 async function buscarDespesas(): Promise<Despesa[]> {
@@ -27,13 +47,50 @@ function formatarDinheiro(valor: number) {
   }).format(valor);
 }
 
+async function buscarReceitas(): Promise<Receita[]> {
+  const response = await fetch("http://127.0.0.1:8000/receitas", {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar receitas");
+  }
+
+  return response.json();
+}
+
 export default async function Home() {
-  const despesas = await buscarDespesas();
+  const [despesas, receitas] = await Promise.all([
+  buscarDespesas(),
+  buscarReceitas(),
+]);
 
   const totalDespesas = despesas.reduce(
     (total, despesa) => total + despesa.valor,
     0
   );
+
+  const totalReceitas = receitas.reduce(
+  (total, receita) => total + receita.valor,
+  0
+);
+
+const saldo = totalReceitas - totalDespesas;
+
+const lancamentos: Lancamento[] = [
+  ...receitas.map((receita) => ({
+    ...receita,
+    tipo: "receita" as const,
+  })),
+
+  ...despesas.map((despesa) => ({
+    ...despesa,
+    tipo: "despesa" as const,
+  })),
+].sort(
+  (a, b) =>
+    new Date(b.data).getTime() - new Date(a.data).getTime()
+);
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
@@ -50,7 +107,10 @@ export default async function Home() {
             </p>
           </div>
 
-          <NovaDespesa />
+          <div className="flex gap-3">
+          <NovaReceita />
+         <NovaDespesa />
+        </div>
         </header>
 
         <section className="grid gap-6 md:grid-cols-3">
@@ -60,9 +120,13 @@ export default async function Home() {
               Saldo do mês
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              --
-            </p>
+            <p
+            className={`mt-2 text-3xl font-bold ${
+            saldo >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+          {formatarDinheiro(saldo)}
+          </p>
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow-sm">
@@ -71,7 +135,7 @@ export default async function Home() {
             </p>
 
             <p className="mt-2 text-3xl font-bold text-green-600">
-              --
+            {formatarDinheiro(totalReceitas)}
             </p>
           </div>
 
@@ -95,43 +159,54 @@ export default async function Home() {
             </h2>
 
             <span className="text-sm text-gray-500">
-              {despesas.length} lançamento(s)
+              {lancamentos.length} lançamento(s)
             </span>
           </div>
 
           <div className="space-y-4">
 
-            {despesas.length === 0 ? (
-              <p className="text-gray-500">
-                Nenhuma despesa cadastrada.
-              </p>
-            ) : (
-              despesas.map((despesa) => (
-                <div
-                  key={despesa.id}
-                  className="flex items-center justify-between border-b pb-4"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {despesa.descricao}
-                    </p>
+           {lancamentos.length === 0 ? (
+  <p className="text-gray-500">
+    Nenhum lançamento cadastrado.
+  </p>
+) : (
+  lancamentos.map((lancamento) => (
+    <div
+      key={`${lancamento.tipo}-${lancamento.id}`}
+      className="flex items-center justify-between border-b py-4"
+    >
+      <div>
+        <p className="font-medium">
+          {lancamento.descricao}
+        </p>
 
-                    <p className="text-sm text-gray-500">
-                      {despesa.categoria}
-                    </p>
-                  </div>
+        <p className="text-sm text-gray-500">
+          {lancamento.tipo === "receita" ? "Receita" : "Despesa"}
+          {" • "}
+          {lancamento.categoria}
+        </p>
+      </div>
 
-                  <p className="font-semibold text-red-600">
-                    - {formatarDinheiro(despesa.valor)}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {despesa.categoria}
-                </p>
-                <AcoesDespesa despesa={despesa} />
-                </div>
-              ))
-            )}
-
+      <div className="flex items-center gap-8">
+        <p
+          className={`font-semibold ${
+            lancamento.tipo === "receita"
+              ? "text-green-600"
+              : "text-red-600"
+          }`}
+        >
+          {lancamento.tipo === "receita" ? "+" : "-"}{" "}
+          {formatarDinheiro(lancamento.valor)}
+        </p>
+        {lancamento.tipo === "receita" ? (
+  <AcoesReceita receita={lancamento} />
+) : (
+  <AcoesDespesa despesa={lancamento} />
+)}
+      </div>
+    </div>
+  ))
+)}
           </div>
         </section>
 
