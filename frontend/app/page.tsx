@@ -59,38 +59,92 @@ async function buscarReceitas(): Promise<Receita[]> {
   return response.json();
 }
 
-export default async function Home() {
-  const [despesas, receitas] = await Promise.all([
-  buscarDespesas(),
-  buscarReceitas(),
-]);
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ mes?: string }>;
+}) {
+  const params = await searchParams;
 
-  const totalDespesas = despesas.reduce(
+  const hoje = new Date();
+
+  const mesAtual =
+    params.mes ??
+    `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+
+  const [despesas, receitas] = await Promise.all([
+    buscarDespesas(),
+    buscarReceitas(),
+  ]);
+
+  const despesasFiltradas = despesas.filter((despesa) =>
+    despesa.data.startsWith(mesAtual)
+  );
+
+  const receitasFiltradas = receitas.filter((receita) =>
+    receita.data.startsWith(mesAtual)
+  );
+
+  const totalDespesas = despesasFiltradas.reduce(
     (total, despesa) => total + despesa.valor,
     0
   );
 
-  const totalReceitas = receitas.reduce(
-  (total, receita) => total + receita.valor,
-  0
-);
+  const totalReceitas = receitasFiltradas.reduce(
+    (total, receita) => total + receita.valor,
+    0
+  );
 
-const saldo = totalReceitas - totalDespesas;
+  const saldo = totalReceitas - totalDespesas;
 
-const lancamentos: Lancamento[] = [
-  ...receitas.map((receita) => ({
-    ...receita,
-    tipo: "receita" as const,
-  })),
+  const lancamentos: Lancamento[] = [
+    ...receitasFiltradas.map((receita) => ({
+      ...receita,
+      tipo: "receita" as const,
+    })),
+    ...despesasFiltradas.map((despesa) => ({
+      ...despesa,
+      tipo: "despesa" as const,
+    })),
+  ].sort(
+    (a, b) =>
+      new Date(b.data).getTime() - new Date(a.data).getTime()
+  );
 
-  ...despesas.map((despesa) => ({
-    ...despesa,
-    tipo: "despesa" as const,
-  })),
-].sort(
-  (a, b) =>
-    new Date(b.data).getTime() - new Date(a.data).getTime()
-);
+  function alterarMes(mes: string, quantidade: number) {
+    const [ano, numeroMes] = mes.split("-").map(Number);
+
+    const data = new Date(
+      ano,
+      numeroMes - 1 + quantidade,
+      1
+    );
+
+    return `${data.getFullYear()}-${String(
+      data.getMonth() + 1
+    ).padStart(2, "0")}`;
+  }
+
+  const mesAnterior = alterarMes(mesAtual, -1);
+  const proximoMes = alterarMes(mesAtual, 1);
+
+  const [anoSelecionado, numeroMesSelecionado] =
+    mesAtual.split("-").map(Number);
+
+  const nomeMes = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+  }).format(
+    new Date(
+      anoSelecionado,
+      numeroMesSelecionado - 1,
+      1
+    )
+  );
+
+  // aqui começa o return (...)
+  
+
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
@@ -112,6 +166,25 @@ const lancamentos: Lancamento[] = [
          <NovaDespesa />
         </div>
         </header>
+        <div className="mb-8 flex items-center justify-center gap-6">
+  <a
+    href={`/?mes=${mesAnterior}`}
+    className="rounded-lg border px-4 py-2 transition hover:bg-gray-100"
+  >
+    ←
+  </a>
+
+  <h2 className="min-w-48 text-center text-xl font-semibold capitalize">
+    {nomeMes}
+  </h2>
+
+  <a
+    href={`/?mes=${proximoMes}`}
+    className="rounded-lg border px-4 py-2 transition hover:bg-gray-100"
+  >
+    →
+  </a>
+</div>
 
         <section className="grid gap-6 md:grid-cols-3">
 
