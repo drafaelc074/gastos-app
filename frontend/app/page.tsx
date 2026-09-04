@@ -264,33 +264,37 @@ const despesasPorCategoria = Object.values(
 
         </section>
 
-<section className="mb-8 rounded-xl border bg-white p-6">
-  <h2 className="mb-4 text-xl font-semibold">
-    Despesas por categoria
-  </h2>
+<div className="mt-8 mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
 
-  {despesasPorCategoria.length > 0 ? (
-    <GraficoDespesasCategoria dados={despesasPorCategoria} />
-  ) : (
-    <p className="text-gray-500">
-      Nenhuma despesa cadastrada neste mês.
-    </p>
-  )}
-</section>
+  <section className="rounded-xl border bg-white p-6">
+    <h2 className="mb-6 text-xl font-semibold">
+      Despesas por categoria
+    </h2>
 
-<section className="mb-8 rounded-xl border bg-white p-6">
-  <h2 className="mb-6 text-xl font-semibold">
-    Evolução mensal
-  </h2>
+    {despesasPorCategoria.length > 0 ? (
+      <GraficoDespesasCategoria dados={despesasPorCategoria} />
+    ) : (
+      <p className="text-gray-500">
+        Nenhuma despesa cadastrada neste mês.
+      </p>
+    )}
+  </section>
 
-  {resumoMensal.length > 0 ? (
-    <GraficoEvolucaoMensal dados={resumoMensal} />
-  ) : (
-    <p className="text-gray-500">
-      Ainda não existem dados suficientes para exibir o histórico.
-    </p>
-  )}
-</section>
+  <section className="rounded-xl border bg-white p-6">
+    <h2 className="mb-6 text-xl font-semibold">
+      Evolução mensal
+    </h2>
+
+    {resumoMensal.length > 0 ? (
+      <GraficoEvolucaoMensal dados={resumoMensal} />
+    ) : (
+      <p className="text-gray-500">
+        Ainda não existem dados suficientes para exibir o histórico.
+      </p>
+    )}
+  </section>
+
+</div>
 
         <section className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
 
