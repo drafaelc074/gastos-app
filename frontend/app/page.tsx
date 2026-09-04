@@ -28,10 +28,13 @@ type Lancamento = {
   tipo: "receita" | "despesa";
 };
 
-async function buscarDespesas(): Promise<Despesa[]> {
-  const response = await fetch("http://127.0.0.1:8000/despesas", {
-    cache: "no-store",
-  });
+async function buscarDespesas(mes: string): Promise<Despesa[]> {
+  const response = await fetch(
+    `http://127.0.0.1:8000/despesas?mes=${mes}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Erro ao buscar despesas");
@@ -47,10 +50,13 @@ function formatarDinheiro(valor: number) {
   }).format(valor);
 }
 
-async function buscarReceitas(): Promise<Receita[]> {
-  const response = await fetch("http://127.0.0.1:8000/receitas", {
-    cache: "no-store",
-  });
+async function buscarReceitas(mes: string): Promise<Receita[]> {
+  const response = await fetch(
+    `http://127.0.0.1:8000/receitas?mes=${mes}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Erro ao buscar receitas");
@@ -73,24 +79,16 @@ export default async function Home({
     `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 
   const [despesas, receitas] = await Promise.all([
-    buscarDespesas(),
-    buscarReceitas(),
-  ]);
+  buscarDespesas(mesAtual),
+  buscarReceitas(mesAtual),
+]);
 
-  const despesasFiltradas = despesas.filter((despesa) =>
-    despesa.data.startsWith(mesAtual)
-  );
-
-  const receitasFiltradas = receitas.filter((receita) =>
-    receita.data.startsWith(mesAtual)
-  );
-
-  const totalDespesas = despesasFiltradas.reduce(
+  const totalDespesas = despesas.reduce(
     (total, despesa) => total + despesa.valor,
     0
   );
 
-  const totalReceitas = receitasFiltradas.reduce(
+  const totalReceitas = receitas.reduce(
     (total, receita) => total + receita.valor,
     0
   );
@@ -98,18 +96,18 @@ export default async function Home({
   const saldo = totalReceitas - totalDespesas;
 
   const lancamentos: Lancamento[] = [
-    ...receitasFiltradas.map((receita) => ({
-      ...receita,
-      tipo: "receita" as const,
-    })),
-    ...despesasFiltradas.map((despesa) => ({
-      ...despesa,
-      tipo: "despesa" as const,
-    })),
-  ].sort(
-    (a, b) =>
-      new Date(b.data).getTime() - new Date(a.data).getTime()
-  );
+  ...receitas.map((receita) => ({
+    ...receita,
+    tipo: "receita" as const,
+  })),
+  ...despesas.map((despesa) => ({
+    ...despesa,
+    tipo: "despesa" as const,
+  })),
+].sort(
+  (a, b) =>
+    new Date(b.data).getTime() - new Date(a.data).getTime()
+);
 
   function alterarMes(mes: string, quantidade: number) {
     const [ano, numeroMes] = mes.split("-").map(Number);

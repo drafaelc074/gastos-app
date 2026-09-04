@@ -122,3 +122,24 @@ def test_excluir_receita():
 
     assert response.status_code == 200
     assert response.json()["message"] == "Receita excluída com sucesso"   
+
+def test_filtrar_despesas_por_mes():
+    response = client.get("/despesas?mes=2026-09")
+
+    assert response.status_code == 200
+
+    despesas = response.json()
+
+    for despesa in despesas:
+        assert despesa["data"].startswith("2026-09")
+
+
+def test_filtrar_receitas_por_mes():
+    response = client.get("/receitas?mes=2026-09")
+
+    assert response.status_code == 200
+
+    receitas = response.json()
+
+    for receita in receitas:
+        assert receita["data"].startswith("2026-09")
