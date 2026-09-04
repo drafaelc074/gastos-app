@@ -2,6 +2,8 @@ import NovaDespesa from "./NovaDespesa";
 import AcoesDespesa from "./AcoesDespesa";
 import NovaReceita from "./NovaReceita";
 import AcoesReceita from "./AcoesReceita";
+import GraficoDespesasCategoria from "./GraficoDespesasCategoria";
+import GraficoEvolucaoMensal from "./GraficoEvolucaoMensal";
 
 type Despesa = {
   id: number;
@@ -26,6 +28,12 @@ type Lancamento = {
   categoria: string;
   data: string;
   tipo: "receita" | "despesa";
+};
+
+type ResumoMensal = {
+  mes: string;
+  receitas: number;
+  despesas: number;
 };
 
 async function buscarDespesas(mes: string): Promise<Despesa[]> {
@@ -65,6 +73,21 @@ async function buscarReceitas(mes: string): Promise<Receita[]> {
   return response.json();
 }
 
+async function buscarResumoMensal(): Promise<ResumoMensal[]> {
+  const response = await fetch(
+    "http://127.0.0.1:8000/resumo-mensal",
+    {
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar resumo mensal");
+  }
+
+  return response.json();
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -78,9 +101,10 @@ export default async function Home({
     params.mes ??
     `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 
-  const [despesas, receitas] = await Promise.all([
+  const [despesas, receitas, resumoMensal] = await Promise.all([
   buscarDespesas(mesAtual),
   buscarReceitas(mesAtual),
+  buscarResumoMensal(),
 ]);
 
   const totalDespesas = despesas.reduce(
@@ -107,6 +131,24 @@ export default async function Home({
 ].sort(
   (a, b) =>
     new Date(b.data).getTime() - new Date(a.data).getTime()
+);
+
+const despesasPorCategoria = Object.values(
+  despesas.reduce(
+    (acc, despesa) => {
+      if (!acc[despesa.categoria]) {
+        acc[despesa.categoria] = {
+          categoria: despesa.categoria,
+          valor: 0,
+        };
+      }
+
+      acc[despesa.categoria].valor += despesa.valor;
+
+      return acc;
+    },
+    {} as Record<string, { categoria: string; valor: number }>
+  )
 );
 
   function alterarMes(mes: string, quantidade: number) {
@@ -221,6 +263,34 @@ export default async function Home({
           </div>
 
         </section>
+
+<section className="mb-8 rounded-xl border bg-white p-6">
+  <h2 className="mb-4 text-xl font-semibold">
+    Despesas por categoria
+  </h2>
+
+  {despesasPorCategoria.length > 0 ? (
+    <GraficoDespesasCategoria dados={despesasPorCategoria} />
+  ) : (
+    <p className="text-gray-500">
+      Nenhuma despesa cadastrada neste mês.
+    </p>
+  )}
+</section>
+
+<section className="mb-8 rounded-xl border bg-white p-6">
+  <h2 className="mb-6 text-xl font-semibold">
+    Evolução mensal
+  </h2>
+
+  {resumoMensal.length > 0 ? (
+    <GraficoEvolucaoMensal dados={resumoMensal} />
+  ) : (
+    <p className="text-gray-500">
+      Ainda não existem dados suficientes para exibir o histórico.
+    </p>
+  )}
+</section>
 
         <section className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
 

@@ -256,3 +256,37 @@ def excluir_receita(
     return {
         "message": "Receita excluída com sucesso"
     }
+
+@app.get("/resumo-mensal")
+def resumo_mensal(
+    db: Session = Depends(get_db)
+):
+    receitas = db.query(ReceitaDB).all()
+    despesas = db.query(DespesaDB).all()
+
+    meses = {}
+
+    for receita in receitas:
+        mes = receita.data.strftime("%Y-%m")
+
+        meses.setdefault(
+            mes,
+            {"mes": mes, "receitas": 0, "despesas": 0}
+        )
+
+        meses[mes]["receitas"] += receita.valor
+
+    for despesa in despesas:
+        mes = despesa.data.strftime("%Y-%m")
+
+        meses.setdefault(
+            mes,
+            {"mes": mes, "receitas": 0, "despesas": 0}
+        )
+
+        meses[mes]["despesas"] += despesa.valor
+
+    return sorted(
+        meses.values(),
+        key=lambda item: item["mes"]
+    )

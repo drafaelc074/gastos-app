@@ -143,3 +143,17 @@ def test_filtrar_receitas_por_mes():
 
     for receita in receitas:
         assert receita["data"].startswith("2026-09")
+
+def test_resumo_mensal():
+    response = client.get("/resumo-mensal")
+
+    assert response.status_code == 200
+
+    resumo = response.json()
+
+    assert isinstance(resumo, list)
+
+    for item in resumo:
+        assert "mes" in item
+        assert "receitas" in item
+        assert "despesas" in item
