@@ -50,7 +50,7 @@ jobs:
         run: |
           python -m pytest -v
 
-            test-frontend:
+    test-frontend:
     runs-on: ubuntu-latest
 
     steps:
