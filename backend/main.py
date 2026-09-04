@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from datetime import date
 from sqlalchemy.orm import Session
-
+from datetime import date
 from database import SessionLocal, engine
 from models import Base, DespesaDB, ReceitaDB
 from fastapi import HTTPException
@@ -83,10 +83,27 @@ def criar_despesa(
 
 @app.get("/despesas")
 def listar_despesas(
+    mes: str | None = None,
     db: Session = Depends(get_db)
 ):
+    query = db.query(DespesaDB)
 
-    return db.query(DespesaDB).all()
+    if mes:
+        ano, numero_mes = map(int, mes.split("-"))
+
+        inicio = date(ano, numero_mes, 1)
+
+        if numero_mes == 12:
+            fim = date(ano + 1, 1, 1)
+        else:
+            fim = date(ano, numero_mes + 1, 1)
+
+        query = query.filter(
+            DespesaDB.data >= inicio,
+            DespesaDB.data < fim
+        )
+
+    return query.all()
 
 @app.put("/despesas/{despesa_id}")
 def atualizar_despesa(
@@ -169,9 +186,27 @@ def criar_receita(
 
 @app.get("/receitas")
 def listar_receitas(
+    mes: str | None = None,
     db: Session = Depends(get_db)
 ):
-    return db.query(ReceitaDB).all()
+    query = db.query(ReceitaDB)
+
+    if mes:
+        ano, numero_mes = map(int, mes.split("-"))
+
+        inicio = date(ano, numero_mes, 1)
+
+        if numero_mes == 12:
+            fim = date(ano + 1, 1, 1)
+        else:
+            fim = date(ano, numero_mes + 1, 1)
+
+        query = query.filter(
+            ReceitaDB.data >= inicio,
+            ReceitaDB.data < fim
+        )
+
+    return query.all()
 
 @app.put("/receitas/{receita_id}")
 def editar_receita(
