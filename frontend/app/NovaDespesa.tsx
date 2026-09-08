@@ -18,7 +18,7 @@ export default function NovaDespesa() {
 
     setSalvando(true);
 
-    const response = await fetch("http://127.0.0.1:8000/despesas", {
+    const response = await fetch("/api/despesas", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

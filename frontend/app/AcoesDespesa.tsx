@@ -33,11 +33,11 @@ export default function AcoesDespesa({
     if (!confirmar) return;
 
     const response = await fetch(
-      `http://127.0.0.1:8000/despesas/${despesa.id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    `/api/despesas/${despesa.id}`,
+    {
+    method: "DELETE",
+    }
+);
 
     if (!response.ok) {
       alert("Erro ao excluir despesa.");
@@ -51,7 +51,7 @@ export default function AcoesDespesa({
     setSalvando(true);
 
     const response = await fetch(
-      `http://127.0.0.1:8000/despesas/${despesa.id}`,
+      `/api/despesas/${despesa.id}`,
       {
         method: "PUT",
         headers: {
