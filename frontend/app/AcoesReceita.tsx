@@ -30,20 +30,20 @@ export default function AcoesReceita({
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/receitas/${receita.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            descricao,
-            valor: Number(valor.replace(",", ".")),
-            categoria,
-            data,
-          }),
-        }
-      );
+      `/api/receitas/${receita.id}`,
+      {
+      method: "PUT",
+      headers: {
+      "Content-Type": "application/json",
+    },
+      body: JSON.stringify({
+      descricao,
+      valor: Number(valor),
+      categoria,
+      data,
+    }),
+  }
+);
 
       if (!response.ok) {
         throw new Error("Erro ao editar receita");
@@ -63,15 +63,15 @@ export default function AcoesReceita({
       `Deseja realmente excluir "${receita.descricao}"?`
     );
 
-    if (!confirmar) return;
+      if (!confirmar) return;
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/receitas/${receita.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      `/api/receitas/${receita.id}`,
+      {
+      method: "DELETE",
+      }
+    );
 
       if (!response.ok) {
         throw new Error("Erro ao excluir receita");
