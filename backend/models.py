@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
 from database import Base
 
 
@@ -19,6 +19,11 @@ class DespesaDB(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String, nullable=False)
     data = Column(Date, nullable=False)
+    usuario_id = Column(
+    Integer,
+    ForeignKey("usuarios.id"),
+    nullable=False
+)
 
 
 class ReceitaDB(Base):
@@ -29,3 +34,8 @@ class ReceitaDB(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String, nullable=False)
     data = Column(Date, nullable=False)
+    usuario_id = Column(
+    Integer,
+    ForeignKey("usuarios.id"),
+    nullable=False
+)
