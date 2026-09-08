@@ -1,5 +1,14 @@
-from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
 from database import Base
+
+
+class UsuarioDB(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    senha_hash = Column(String, nullable=False)
 
 
 class DespesaDB(Base):
@@ -10,6 +19,11 @@ class DespesaDB(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String, nullable=False)
     data = Column(Date, nullable=False)
+    usuario_id = Column(
+    Integer,
+    ForeignKey("usuarios.id"),
+    nullable=False
+)
 
 
 class ReceitaDB(Base):
@@ -20,3 +34,8 @@ class ReceitaDB(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String, nullable=False)
     data = Column(Date, nullable=False)
+    usuario_id = Column(
+    Integer,
+    ForeignKey("usuarios.id"),
+    nullable=False
+)
