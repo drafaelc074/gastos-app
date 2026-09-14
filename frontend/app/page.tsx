@@ -40,6 +40,25 @@ type ResumoMensal = {
   despesas: number;
 };
 
+async function buscarUsuario(token: string) {
+  const response = await fetch("http://127.0.0.1:8000/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    redirect("/login");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar usuário");
+  }
+
+  return response.json();
+}
+
 async function buscarDespesas(
   mes: string,
   token: string
@@ -145,15 +164,12 @@ export default async function Home({
       hoje.getMonth() + 1
     ).padStart(2, "0")}`;
 
-  const [
-    despesas,
-    receitas,
-    resumoMensal,
-  ] = await Promise.all([
-    buscarDespesas(mesAtual, token),
-    buscarReceitas(mesAtual, token),
-    buscarResumoMensal(token),
-  ]);
+  const [despesas, receitas, resumoMensal, usuario] = await Promise.all([
+  buscarDespesas(mesAtual, token),
+  buscarReceitas(mesAtual, token),
+  buscarResumoMensal(token),
+  buscarUsuario(token),
+]);
 
   const totalDespesas = despesas.reduce(
     (total, despesa) =>
@@ -270,7 +286,7 @@ export default async function Home({
           </div>
 
           <div className="flex items-center gap-6">
-            <UsuarioLogado />
+            <UsuarioLogado usuario={usuario} />
 
           <div className="flex gap-3">
             <NovaReceita />
