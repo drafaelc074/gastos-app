@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   const response = await fetch(
-    "http://127.0.0.1:8000/despesas",
+    `${BACKEND_URL}/despesas`,
     {
       method: "POST",
       headers: {

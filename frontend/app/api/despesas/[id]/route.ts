@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend";
 
 export async function PUT(
   request: Request,
@@ -20,7 +21,7 @@ export async function PUT(
   const body = await request.json();
 
   const response = await fetch(
-    `http://127.0.0.1:8000/despesas/${id}`,
+    `${BACKEND_URL}/despesas/${id}`,
     {
       method: "PUT",
       headers: {
@@ -55,7 +56,7 @@ export async function DELETE(
   }
 
   const response = await fetch(
-    `http://127.0.0.1:8000/despesas/${id}`,
+    `${BACKEND_URL}/despesas/${id}`,
     {
       method: "DELETE",
       headers: {

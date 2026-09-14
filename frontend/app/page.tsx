@@ -9,6 +9,8 @@ import GraficoDespesasCategoria from "./GraficoDespesasCategoria";
 import GraficoEvolucaoMensal from "./GraficoEvolucaoMensal";
 import UsuarioLogado from "./UsuarioLogado";
 
+import { BACKEND_URL } from "@/lib/backend";
+
 type Despesa = {
   id: number;
   descricao: string;
@@ -41,7 +43,7 @@ type ResumoMensal = {
 };
 
 async function buscarUsuario(token: string) {
-  const response = await fetch("http://127.0.0.1:8000/me", {
+  const response = await fetch("${BACKEND_URL}/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -64,7 +66,7 @@ async function buscarDespesas(
   token: string
 ): Promise<Despesa[]> {
   const response = await fetch(
-    `http://127.0.0.1:8000/despesas?mes=${mes}`,
+    `${BACKEND_URL}/despesas?mes=${mes}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -89,7 +91,7 @@ async function buscarReceitas(
   token: string
 ): Promise<Receita[]> {
   const response = await fetch(
-    `http://127.0.0.1:8000/receitas?mes=${mes}`,
+    `${BACKEND_URL}/receitas?mes=${mes}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -113,7 +115,7 @@ async function buscarResumoMensal(
   token: string
 ): Promise<ResumoMensal[]> {
   const response = await fetch(
-    "http://127.0.0.1:8000/resumo-mensal",
+    `${BACKEND_URL}/resumo-mensal`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
