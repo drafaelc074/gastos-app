@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 type Usuario = {
   id: number;
@@ -9,23 +8,12 @@ type Usuario = {
   email: string;
 };
 
-export default function UsuarioLogado() {
+export default function UsuarioLogado({
+  usuario,
+}: {
+  usuario: Usuario;
+}) {
   const router = useRouter();
-
-  const [usuario, setUsuario] =
-    useState<Usuario | null>(null);
-
-  async function carregarUsuario() {
-    const response = await fetch("/api/me");
-
-    if (!response.ok) {
-      return;
-    }
-
-    const dados = await response.json();
-
-    setUsuario(dados);
-  }
 
   async function sair() {
     await fetch("/api/logout", {
@@ -34,14 +22,6 @@ export default function UsuarioLogado() {
 
     router.push("/login");
     router.refresh();
-  }
-
-  useEffect(() => {
-    carregarUsuario();
-  }, []);
-
-  if (!usuario) {
-    return null;
   }
 
   return (
