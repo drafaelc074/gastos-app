@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "@/lib/backend";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -13,7 +14,7 @@ export async function GET() {
   }
 
   const response = await fetch(
-    "http://127.0.0.1:8000/me",
+    `${BACKEND_URL}/me`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
