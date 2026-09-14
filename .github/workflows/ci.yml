@@ -47,6 +47,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql://gastos_user:gastos_password@localhost:5432/gastos
+          SECRET_KEY: ci_test_secret_key_gastos_app_2026
         run: |
           python -m pytest -v
 
