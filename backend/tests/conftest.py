@@ -8,8 +8,8 @@ from sqlalchemy.pool import StaticPool
 backend_path = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_path))
 
-from database import Base
-from main import app, get_db
+from database import Base, get_db
+from main import app
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite://"
