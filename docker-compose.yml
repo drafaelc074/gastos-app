@@ -5,18 +5,15 @@ services:
     container_name: gastos-postgres
 
     environment:
-      POSTGRES_DB: gastos
-      POSTGRES_USER: gastos_user
-      POSTGRES_PASSWORD: gastos_password
-
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gastos_user -d gastos"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -32,11 +29,12 @@ services:
       - ./backend/.env.docker
 
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
     depends_on:
       postgres:
         condition: service_healthy
+
 
   frontend:
     build:
@@ -46,12 +44,15 @@ services:
 
     environment:
       BACKEND_URL: http://backend:8000
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
 
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
     depends_on:
       - backend
 
+
 volumes:
   postgres_data:
+  
