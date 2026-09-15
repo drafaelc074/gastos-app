@@ -43,7 +43,7 @@ type ResumoMensal = {
 };
 
 async function buscarUsuario(token: string) {
-  const response = await fetch("${BACKEND_URL}/me", {
+  const response = await fetch(`${BACKEND_URL}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
