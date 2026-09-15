@@ -21,3 +21,5 @@ node_modules/
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+.env.docker
