@@ -1,3 +1,4 @@
+
 name: AWS OIDC Test
 
 on:
@@ -11,7 +12,8 @@ jobs:
   test-aws-auth:
     runs-on: ubuntu-latest
 
-       - name: Inspect OIDC token claims
+    steps:
+      - name: Inspect OIDC token claims
         shell: bash
         run: |
           RESPONSE=$(curl -fsS \
@@ -20,11 +22,13 @@ jobs:
 
           TOKEN=$(echo "$RESPONSE" | jq -r '.value')
 
-          echo "$TOKEN" | cut -d '.' -f2 | \
-            base64 -d 2>/dev/null | \
+          PAYLOAD=$(echo "$TOKEN" | cut -d '.' -f2)
+          PAYLOAD="${PAYLOAD//-/+}"
+          PAYLOAD="${PAYLOAD//_/\/}"
+
+          printf '%s' "$PAYLOAD" | base64 -d 2>/dev/null | \
             jq '{iss, aud, sub, repository, ref, environment}'
-            
-    steps:
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
