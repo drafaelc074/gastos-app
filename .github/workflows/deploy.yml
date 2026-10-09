@@ -1,4 +1,3 @@
-
 name: Deploy Gastos App - EC2
 
 on:
@@ -24,7 +23,7 @@ jobs:
           role-to-assume: arn:aws:iam::012646747350:role/GastosApp-GitHubActions-Deploy
           aws-region: us-east-2
 
-        - name: Deploy via AWS SSM
+      - name: Deploy via AWS SSM
         shell: bash
         run: |
           set -euo pipefail
