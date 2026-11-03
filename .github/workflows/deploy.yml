@@ -2,6 +2,10 @@ name: Deploy Gastos App - EC2
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Backend CI"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   id-token: write
@@ -13,6 +17,14 @@ concurrency:
 
 jobs:
   deploy:
+    if: >-
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -25,19 +37,37 @@ jobs:
 
       - name: Deploy via AWS SSM
         shell: bash
+        env:
+          DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
         run: |
           set -euo pipefail
 
           INSTANCE_ID="i-0a974ea1a379826e2"
+          # Validar o SHA recebido do GitHub
+          if [[ ! "$DEPLOY_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "ERROR: Invalid commit SHA"
+            exit 1
+          fi
+
+          echo "Deploying commit: $DEPLOY_SHA"
+
+          # Buscar e executar o script do commit aprovado
+          REMOTE_COMMAND="runuser -u ubuntu -- bash -lc 'set -euo pipefail; cd /home/ubuntu/gastos-app; git fetch origin main; git show ${DEPLOY_SHA}:deploy/deploy.sh | bash -s -- ${DEPLOY_SHA}'"
+
+          PARAMETERS=$(jq -n \
+            --arg command "$REMOTE_COMMAND" \
+            '{commands: [$command]}')
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --comment "Gastos App staging deployment" \
+            --comment "Gastos App deployment" \
             --timeout-seconds 900 \
-            --parameters '{"commands":["set -eu","runuser -u ubuntu -- bash -lc '\''cd /home/ubuntu/gastos-app && git fetch origin main && git show origin/main:deploy/deploy.sh | bash'\''"]}' \
+            --parameters "$PARAMETERS" \
             --query "Command.CommandId" \
             --output text)
+
 
           echo "SSM Command ID: $COMMAND_ID"
 
